@@ -107,7 +107,8 @@ if search_mode == "Search by Job ID":
 # MODE 2 — FILTER BY SIMILARITY %
 # ----------------------------------
 elif search_mode == "Filter by Similarity Threshold":
-    
+elif search_mode == "Filter by Similarity Threshold":
+
     threshold = st.sidebar.slider(
         "Show Job Pairs with Similarity ≥",
         min_value=0,
@@ -115,23 +116,15 @@ elif search_mode == "Filter by Similarity Threshold":
         value=70
     )
 
-    # Filter pairs based on threshold
     filtered = (
         results_df[
             results_df["Similarity %"] >= threshold
         ]
         .sort_values("Similarity %", ascending=False)
-        .reset_index(drop=True)        
+        .reset_index(drop=True)
     )
 
-    st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
-    st.caption(f"🔢 {len(filtered)} job pairs found")
-
-    # ----------------------------------
-    # NEW: SIMILARITY SUMMARY DASHBOARD
-    # ----------------------------------
-
-    # Count frequency of each Job ID in filtered pairs
+    # Compute job counts
     job_counts = {}
 
     for _, row in filtered.iterrows():
@@ -143,13 +136,44 @@ elif search_mode == "Filter by Similarity Threshold":
 
     unique_jobs = len(job_counts)
 
+    # ✅ Sidebar Summary (MUST stay inside this block)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("## 📊 Similarity Summary")
 
-    st.markdown("---")
+    st.sidebar.markdown(f"""
+    **Total Matching Pairs:** {len(filtered)}  
+    **Unique Job IDs:** {unique_jobs}
+    """)
 
-    # Show filtered dataframe
-    st.dataframe(filtered, 
-                 use_container_width=True,
-                 hide_index=True)
+    if job_counts:
+
+        job_count_df = pd.DataFrame(
+            list(job_counts.values()),
+            columns=["Match Count"]
+        )
+
+        distribution = (
+            job_count_df
+            .value_counts()
+            .reset_index(name="Number of Job IDs")
+            .sort_values("Match Count")
+            .reset_index(drop=True)
+        )
+
+        st.sidebar.markdown("### Distribution of Job Match Counts")
+        st.sidebar.dataframe(
+            distribution,
+            width="stretch",   # updated from use_container_width
+            hide_index=True
+        )
+
+    else:
+        st.sidebar.info("No matching job pairs at selected threshold.")
+
+    # Main page table
+    st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
+    st.caption(f"🔢 {len(filtered)} job pairs found")
+    st.dataframe(filtered, width="stretch")
 
 
 
@@ -170,7 +194,7 @@ elif search_mode == "NLP Search":
         results = search_by_natural_language(query)
 
         st.caption(f"🔎 Top {len(results)} roles matching your query")
-        st.dataframe(results, use_container_width=True)
+        st.dataframe(results, width="stretch")
 
 # ----------------------------------
 # SIDEBAR SIMILARITY SUMMARY (EXACT MATCH COUNT TABLE)
@@ -208,7 +232,7 @@ if job_counts:
 
     st.sidebar.markdown("### Distribution of Job Match Counts")
     st.sidebar.dataframe(distribution, 
-                         use_container_width=True,
+                         width="stretch",#use_container_width=True,
                          hide_index=True)
 
 else:
