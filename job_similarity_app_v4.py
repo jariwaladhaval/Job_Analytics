@@ -23,6 +23,12 @@ st.set_page_config(
 def load_data():
     results = pd.read_excel("job_similarity_output_v1.xlsx")
     matrix = pd.read_excel("job_similarity_matrix.xlsx", index_col=0)
+    jobs_master = pd.read_csv("jobs_dataset.csv")
+    
+    # Clean column names
+    results.columns = results.columns.str.strip()
+    matrix.columns = matrix.columns.str.strip()
+    jobs_master.columns = jobs_master.columns.str.strip()
 
     # Clean Job IDs
     results["Job ID"] = results["Job ID"].astype(str).str.replace(",", "")
@@ -30,25 +36,24 @@ def load_data():
     matrix.index = matrix.index.astype(str).str.replace(",", "")
     matrix.columns = matrix.columns.astype(str).str.replace(",", "")
 
-    return results, matrix
+    jobs_master["Job ID"] = jobs_master["Job ID"].astype(str).str.replace(",", "")
 
-results_df, similarity_matrix = load_data()
+    return results, matrix, jobs_master
+
+results_df, similarity_matrix, jobs_master = load_data()
+
 
 # ----------------------------------
 # CREATE JOB ID → JOB NAME MAPPING
 # ----------------------------------
 
+
 job_id_to_name = (
-    results_df[["Job ID", "Job"]]
-    .drop_duplicates()
+    jobs_master
+    .drop_duplicates(subset=["Job ID"])
     .set_index("Job ID")["Job"]
     .to_dict()
 )
-
-
-
-
-
 
 
 
