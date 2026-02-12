@@ -153,7 +153,7 @@ if search_mode == "Search by Job ID":
          "Similarity %"]
     ]
     
-    st.dataframe(filtered_display, width="stretch")
+    st.dataframe(filtered_display, width="stretch", hide_index=True)
 
 
 
@@ -257,7 +257,7 @@ elif search_mode == "Filter by Similarity Threshold":
          "Similarity %"]
     ]
     
-    st.dataframe(filtered_display, width="stretch")
+    st.dataframe(filtered_display, width="stretch", hide_index=True)
 
 
 
@@ -286,7 +286,7 @@ elif search_mode == "NLP Search":
             how="left"
         )
 
-    st.dataframe(results_display, width="stretch")
+    st.dataframe(results_display, width="stretch", hide_index=True)
 
 
 
