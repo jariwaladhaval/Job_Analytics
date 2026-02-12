@@ -147,11 +147,22 @@ if search_mode == "Search by Job ID":
     )
     
     # Reorder columns (clean UI)
-    filtered_display = filtered_display[
-        ["Job ID", "Job Name",
-         "Compared Job ID", "Compared Job Name",
-         "Similarity %"]
+    priority_cols = [
+    "Job ID",
+    "Job Name",
+    "Compared Job ID",
+    "Compared Job Name",
+    "Similarity %",
+    "Text Similarity %",
+    "Competency Similarity %",
+    "Similarity Reason"
     ]
+    
+    existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
+    remaining_cols = [c for c in filtered_display.columns if c not in existing_priority_cols]
+    
+    filtered_display = filtered_display[existing_priority_cols + remaining_cols]
+
     
     st.dataframe(filtered_display, width="stretch", hide_index=True)
 
