@@ -23,7 +23,7 @@ st.set_page_config(
 def load_data():
     results = pd.read_excel("job_similarity_output_v1.xlsx")
     matrix = pd.read_excel("job_similarity_matrix.xlsx", index_col=0)
-    jobs_master = pd.read_csv("jobs_master.csv", encoding="latin1")
+    jobs_master = pd.read_csv("jobs_dataset.csv", encoding="latin1")
     
     # Clean column names
     results.columns = results.columns.str.strip()
