@@ -31,12 +31,12 @@ def load_data():
     jobs_master.columns = jobs_master.columns.str.strip()
 
     # Clean Job IDs
-    results["Job ID"] = results["Job ID"].astype(str).str.replace(",", "")
-    results["Compared Job ID"] = results["Compared Job ID"].astype(str).str.replace(",", "")
+    results["Job ID"] = results["Job ID"].astype(str).str.replace(",", "").str.strip()
+    results["Compared Job ID"] = results["Compared Job ID"].astype(str).str.replace(",", "").str.strip()
     matrix.index = matrix.index.astype(str).str.replace(",", "")
     matrix.columns = matrix.columns.astype(str).str.replace(",", "")
 
-    jobs_master["Job ID"] = jobs_master["Job ID"].astype(str).str.replace(",", "")
+    jobs_master["Job ID"] = jobs_master["Job ID"].astype(str).str.replace(",", "").str.strip()
 
     return results, matrix, jobs_master
 
