@@ -125,26 +125,36 @@ if search_mode == "Search by Job ID":
     st.subheader(f"📌 Similar roles for Job ID: {selected_job}")
     st.caption(f"🔢 {len(filtered)} matching roles found")
 
-    filtered_display = filtered.merge(
-    jobs_master[["Job ID", "Job"]],
-    on="Job ID",
-    how="left"
-    )
-    
+    filtered_display = filtered.copy()
+
+    # Merge for main Job ID
     filtered_display = filtered_display.merge(
-        jobs_master[["Job ID", "Job"]],
-        left_on="Compared Job ID",
-        right_on="Job ID",
-        how="left",
-        suffixes=("", "_Compared")
+        jobs_master[["Job ID", "Job"]]
+            .rename(columns={"Job": "Job Name"}),
+        on="Job ID",
+        how="left"
     )
     
-    filtered_display.rename(columns={
-        "Job": "Job Name",
-        "Job_Compared": "Compared Job Name"
-    }, inplace=True)
+    # Merge for Compared Job ID
+    filtered_display = filtered_display.merge(
+        jobs_master[["Job ID", "Job"]]
+            .rename(columns={
+                "Job ID": "Compared Job ID",
+                "Job": "Compared Job Name"
+            }),
+        on="Compared Job ID",
+        how="left"
+    )
+    
+    # Reorder columns (clean UI)
+    filtered_display = filtered_display[
+        ["Job ID", "Job Name",
+         "Compared Job ID", "Compared Job Name",
+         "Similarity %"]
+    ]
     
     st.dataframe(filtered_display, width="stretch")
+
 
 
 
@@ -219,11 +229,35 @@ elif search_mode == "Filter by Similarity Threshold":
     st.caption(f"🔢 {len(filtered)} job pairs found")
     filtered_display = filtered.copy()
 
-    filtered_display["Job Name"] = filtered_display["Job ID"].map(job_id_to_name)
-    filtered_display["Compared Job Name"] = filtered_display["Compared Job ID"].map(job_id_to_name)
+    filtered_display = filtered.copy()
+
+    # Merge for main Job ID
+    filtered_display = filtered_display.merge(
+        jobs_master[["Job ID", "Job"]]
+            .rename(columns={"Job": "Job Name"}),
+        on="Job ID",
+        how="left"
+    )
+    
+    # Merge for Compared Job ID
+    filtered_display = filtered_display.merge(
+        jobs_master[["Job ID", "Job"]]
+            .rename(columns={
+                "Job ID": "Compared Job ID",
+                "Job": "Compared Job Name"
+            }),
+        on="Compared Job ID",
+        how="left"
+    )
+    
+    # Reorder columns (clean UI)
+    filtered_display = filtered_display[
+        ["Job ID", "Job Name",
+         "Compared Job ID", "Compared Job Name",
+         "Similarity %"]
+    ]
     
     st.dataframe(filtered_display, width="stretch")
-
 
 
 
@@ -242,14 +276,18 @@ elif search_mode == "NLP Search":
 
     if query:
         results = search_by_natural_language(query)
-
-        st.caption(f"🔎 Top {len(results)} roles matching your query")
         results_display = results.copy()
 
     if "Job ID" in results_display.columns:
-        results_display["Job Name"] = results_display["Job ID"].map(job_id_to_name)
-    
+        results_display = results_display.merge(
+            jobs_master[["Job ID", "Job"]]
+                .rename(columns={"Job": "Job Name"}),
+            on="Job ID",
+            how="left"
+        )
+
     st.dataframe(results_display, width="stretch")
+
 
 
 
