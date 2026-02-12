@@ -34,6 +34,18 @@ def load_data():
 
 results_df, similarity_matrix = load_data()
 
+# ----------------------------------
+# CREATE JOB ID → JOB NAME MAPPING
+# ----------------------------------
+
+job_id_to_name = (
+    results_df[["Job ID", "Job"]]
+    .drop_duplicates()
+    .set_index("Job ID")["Job"]
+    .to_dict()
+)
+
+
 
 
 
@@ -77,10 +89,17 @@ if search_mode == "Search by Job ID":
 
     job_ids = sorted(results_df["Job ID"].unique())
 
+    job_display_options = {
+        job_id: f"{job_id} – {job_id_to_name.get(job_id, '')}"
+        for job_id in job_ids
+    }
+    
     selected_job = st.sidebar.selectbox(
-        "Select Job ID",
-        job_ids
+        "Select Job",
+        job_ids,
+        format_func=lambda x: job_display_options[x]
     )
+
 
     min_sim = st.sidebar.slider(
         "Minimum Similarity %",
@@ -101,7 +120,13 @@ if search_mode == "Search by Job ID":
     st.subheader(f"📌 Similar roles for Job ID: {selected_job}")
     st.caption(f"🔢 {len(filtered)} matching roles found")
 
-    st.dataframe(filtered, use_container_width=True)
+    filtered_display = filtered.copy()
+
+    filtered_display["Job Name"] = filtered_display["Job ID"].map(job_id_to_name)
+    filtered_display["Compared Job Name"] = filtered_display["Compared Job ID"].map(job_id_to_name)
+    
+    st.dataframe(filtered_display, width="stretch")
+
 
 # ----------------------------------
 # MODE 2 — FILTER BY SIMILARITY %
@@ -172,7 +197,13 @@ elif search_mode == "Filter by Similarity Threshold":
     # Main page table
     st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
     st.caption(f"🔢 {len(filtered)} job pairs found")
-    st.dataframe(filtered, width="stretch")
+    filtered_display = filtered.copy()
+
+    filtered_display["Job Name"] = filtered_display["Job ID"].map(job_id_to_name)
+    filtered_display["Compared Job Name"] = filtered_display["Compared Job ID"].map(job_id_to_name)
+    
+    st.dataframe(filtered_display, width="stretch")
+
 
 
 
@@ -193,7 +224,13 @@ elif search_mode == "NLP Search":
         results = search_by_natural_language(query)
 
         st.caption(f"🔎 Top {len(results)} roles matching your query")
-        st.dataframe(results, width="stretch")
+        results_display = results.copy()
+
+    if "Job ID" in results_display.columns:
+        results_display["Job Name"] = results_display["Job ID"].map(job_id_to_name)
+    
+    st.dataframe(results_display, width="stretch")
+
 
 
     
@@ -205,9 +242,11 @@ elif search_mode == "NLP Search":
 with st.expander("🧮 Job-Specific Similarity Matrix View"):
 
     matrix_job = st.selectbox(
-        "Select Job ID to view its similarity matrix",
-        similarity_matrix.index.tolist()
+    "Select Job",
+    similarity_matrix.index.tolist(),
+    format_func=lambda x: f"{x} – {job_id_to_name.get(x, '')}"
     )
+
 
     matrix_view = (
         similarity_matrix
