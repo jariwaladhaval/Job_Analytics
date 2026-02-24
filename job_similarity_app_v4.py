@@ -67,7 +67,7 @@ job_lookup = (
     .drop_duplicates(subset=["Job ID"])
     .rename(columns={
         "Job": "Job Name",
-        "work steam": "Work Stream",
+        "work steam": "Work Steam",
         "Domain": "Domain"
     })
 )
