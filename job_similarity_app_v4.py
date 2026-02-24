@@ -45,18 +45,32 @@ def load_data():
 results_df, similarity_matrix, jobs_master = load_data()
 
 # ----------------------------------
+# CLEAN COLUMN NAMES SAFELY
+# ----------------------------------
+
+jobs_master.columns = jobs_master.columns.str.strip()
+
+# Try to auto-detect columns
+job_col = [c for c in jobs_master.columns if "job" in c.lower() and c.lower() != "job id"][0]
+worksteam_col = [c for c in jobs_master.columns if "work" in c.lower()][0]
+domain_col = [c for c in jobs_master.columns if "domain" in c.lower()][0]
+
+# ----------------------------------
 # CREATE MASTER LOOKUP TABLE
 # ----------------------------------
 
 job_lookup = (
     jobs_master[
-        ["Job ID", "Job", "work steam", "Domain"]
+        ["Job ID", job_col, worksteam_col, domain_col]
     ]
     .drop_duplicates(subset=["Job ID"])
     .rename(columns={
-        "Job": "Job Name"
+        job_col: "Job Name",
+        worksteam_col: "Work Stream",
+        domain_col: "Domain"
     })
 )
+
 
 
 
