@@ -50,7 +50,7 @@ results_df, similarity_matrix, jobs_master = load_data()
 
 job_lookup = (
     jobs_master[
-        ["Job ID", "Job", "Work Stream", "Domain"]
+        ["Job ID", "Job", "work steam", "Domain"]
     ]
     .drop_duplicates(subset=["Job ID"])
     .rename(columns={
