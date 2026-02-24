@@ -156,7 +156,7 @@ if search_mode == "Search by Job ID":
         job_lookup.rename(columns={
             "Job ID": "Compared Job ID",
             "Job Name": "Compared Job Name",
-            "Work Stream": "Compared Work Stream",
+            "work steam": "Compared Work Steam",
             "Domain": "Compared Domain"
         }),
         on="Compared Job ID",
@@ -168,11 +168,11 @@ if search_mode == "Search by Job ID":
     priority_cols = [
     "Job ID",
     "Job Name",
-    "Work Stream",
+    "work steam",
     "Domain",
     "Compared Job ID",
     "Compared Job Name",
-    "Compared Work Stream",
+    "Compared Work Steam",
     "Compared Domain",
     "Similarity %",
     "Text Similarity %",
@@ -277,7 +277,7 @@ elif search_mode == "Filter by Similarity Threshold":
         job_lookup.rename(columns={
             "Job ID": "Compared Job ID",
             "Job Name": "Compared Job Name",
-            "Work Stream": "Compared Work Stream",
+            "work steam": "Compared Work Steam",
             "Domain": "Compared Domain"
         }),
         on="Compared Job ID",
