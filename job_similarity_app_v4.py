@@ -59,17 +59,19 @@ domain_col = [c for c in jobs_master.columns if "Domain" in c.lower()][0]
 # CREATE MASTER LOOKUP TABLE
 # ----------------------------------
 
+
 job_lookup = (
     jobs_master[
-        ["Job ID", job_col, worksteam_col, domain_col]
+        ["Job ID", "Job", "work steam", "Domain"]
     ]
     .drop_duplicates(subset=["Job ID"])
     .rename(columns={
-        job_col: "Job Name",
-        worksteam_col: "Work Stream",
-        domain_col: "Domain"
+        "Job": "Job Name",
+        "work steam": "Work Stream",
+        "Domain": "Domain"
     })
 )
+
 
 
 
