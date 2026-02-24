@@ -45,48 +45,40 @@ def load_data():
 results_df, similarity_matrix, jobs_master = load_data()
 
 # ----------------------------------
-# CLEAN COLUMN NAMES SAFELY
+# STANDARDIZE COLUMN NAMES
 # ----------------------------------
 
-jobs_master.columns = jobs_master.columns.str.strip()
+jobs_master.columns = jobs_master.columns.str.strip().str.lower()
 
-# Try to auto-detect columns
-job_col = [c for c in jobs_master.columns if "job" in c.lower() and c.lower() != "job id"][0]
-worksteam_col = [c for c in jobs_master.columns if "work" in c.lower()][0]
-domain_col = [c for c in jobs_master.columns if "Domain" in c.lower()][0]
+# Fix spelling issue once
+jobs_master = jobs_master.rename(columns={
+    "work steam": "work stream"
+})
 
 # ----------------------------------
 # CREATE MASTER LOOKUP TABLE
 # ----------------------------------
 
-
 job_lookup = (
     jobs_master[
-        ["Job ID", "Job", "work steam", "Domain"]
+        ["job id", "job", "work stream", "domain"]
     ]
-    .drop_duplicates(subset=["Job ID"])
+    .drop_duplicates(subset=["job id"])
     .rename(columns={
-        "Job": "Job Name",
-        "work steam": "Work Steam",
-        "Domain": "Domain"
+        "job id": "Job ID",
+        "job": "Job Name",
+        "work stream": "Work Stream",
+        "domain": "Domain"
     })
 )
 
-
-
-
-
-# ----------------------------------
-# CREATE JOB ID → JOB NAME MAPPING
-# ----------------------------------
-
-
+# For sidebar formatting
 job_id_to_name = (
-    jobs_master
-    .drop_duplicates(subset=["Job ID"])
-    .set_index("Job ID")["Job"]
+    job_lookup
+    .set_index("Job ID")["Job Name"]
     .to_dict()
 )
+
 
 
 
@@ -160,41 +152,45 @@ if search_mode == "Search by Job ID":
 
     filtered_display = filtered.copy()
 
-    # Merge for main Job ID
+    filtered_display = filtered.copy()
+    
+    # Merge main job
     filtered_display = filtered_display.merge(
         job_lookup,
         on="Job ID",
         how="left"
     )
     
-    # Merge for Compared Job ID
+    # Merge compared job
     filtered_display = filtered_display.merge(
         job_lookup.rename(columns={
             "Job ID": "Compared Job ID",
             "Job Name": "Compared Job Name",
-            "work steam": "Compared Work Steam",
+            "Work Stream": "Compared Work Stream",
             "Domain": "Compared Domain"
         }),
         on="Compared Job ID",
         how="left"
     )
 
+
     
     # Reorder columns (clean UI)
     priority_cols = [
     "Job ID",
     "Job Name",
-    "work steam",
+    "Work Stream",
     "Domain",
     "Compared Job ID",
     "Compared Job Name",
-    "Compared Work Steam",
+    "Compared Work Stream",
     "Compared Domain",
     "Similarity %",
     "Text Similarity %",
     "Competency Similarity %",
     "Similarity Reason"
     ]
+
 
     
     existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
@@ -281,36 +277,44 @@ elif search_mode == "Filter by Similarity Threshold":
 
     filtered_display = filtered.copy()
 
-    # Merge for main Job ID
+    filtered_display = filtered.copy()
+
+    # Merge main job
     filtered_display = filtered_display.merge(
         job_lookup,
         on="Job ID",
         how="left"
     )
     
-    # Merge for Compared Job ID
+    # Merge compared job
     filtered_display = filtered_display.merge(
         job_lookup.rename(columns={
             "Job ID": "Compared Job ID",
             "Job Name": "Compared Job Name",
-            "work steam": "Compared Work Steam",
+            "Work Stream": "Compared Work Stream",
             "Domain": "Compared Domain"
         }),
         on="Compared Job ID",
         how="left"
     )
 
+
     
     priority_cols = [
     "Job ID",
     "Job Name",
+    "Work Stream",
+    "Domain",
     "Compared Job ID",
     "Compared Job Name",
+    "Compared Work Stream",
+    "Compared Domain",
     "Similarity %",
     "Text Similarity %",
     "Competency Similarity %",
     "Similarity Reason"
     ]
+
     
     existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
     remaining_cols = [c for c in filtered_display.columns if c not in existing_priority_cols]
