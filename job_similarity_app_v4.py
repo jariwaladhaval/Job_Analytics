@@ -328,49 +328,51 @@ elif search_mode == "Filter by Similarity Threshold":
     filtered_display = filtered_display[existing_priority_cols + remaining_cols]
 
     
+    
     # ----------------------------------
-# MAIN LAYOUT: 2 COLUMNS
-# ----------------------------------
-
-col1, col2 = st.columns([2, 1])  # Left wider than right
-
-# LEFT SIDE → Full Matching Pairs
-with col1:
-    st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
-    st.caption(f"🔢 {len(filtered)} job pairs found")
-    st.dataframe(filtered_display, width="stretch", hide_index=True)
-
+    # MAIN LAYOUT: 2 COLUMNS
+    # ----------------------------------
+    
+    col1, col2 = st.columns([2, 1])  # Left wider than right
+    
+    # LEFT SIDE → Full Matching Pairs
+    with col1:
+        st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
+        st.caption(f"🔢 {len(filtered)} job pairs found")
+        st.dataframe(filtered_display, width="stretch", hide_index=True)
+    
     # RIGHT SIDE → Drilldown
     with col2:
+    
+        if job_counts:
+    
+            st.subheader("📌 Drilldown View")
+    
+            # Get Job IDs having selected match count
+            job_ids_with_count = [
+                job_id for job_id, count in job_counts.items()
+                if count == selected_match_count
+            ]
+    
+            drilldown_df = filtered_display[
+                filtered_display["Job ID"].isin(job_ids_with_count)
+            ]
+    
+            st.caption(f"{len(job_ids_with_count)} Job IDs found")
+    
+            st.dataframe(drilldown_df, width="stretch", hide_index=True)
+    
+            csv = drilldown_df.to_csv(index=False).encode("utf-8")
+    
+            st.download_button(
+                label="⬇️ Download Drilldown",
+                data=csv,
+                file_name=f"job_match_count_{selected_match_count}.csv",
+                mime="text/csv"
+            )
+
+    
         
-            if job_counts:
-        
-                st.subheader("📌 Drilldown View")
-        
-                # Get Job IDs having selected match count
-                job_ids_with_count = [
-                    job_id for job_id, count in job_counts.items()
-                    if count == selected_match_count
-                ]
-        
-                drilldown_df = filtered_display[
-                    filtered_display["Job ID"].isin(job_ids_with_count)
-                ]
-        
-                st.caption(f"{len(job_ids_with_count)} Job IDs found")
-        
-                st.dataframe(drilldown_df, width="stretch", hide_index=True)
-        
-                csv = drilldown_df.to_csv(index=False).encode("utf-8")
-        
-                st.download_button(
-                    label="⬇️ Download Drilldown",
-                    data=csv,
-                    file_name=f"job_match_count_{selected_match_count}.csv",
-                    mime="text/csv"
-                )
-        
-                
 
 
 # ----------------------------------
