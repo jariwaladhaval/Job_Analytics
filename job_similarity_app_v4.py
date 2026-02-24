@@ -340,8 +340,8 @@ with col1:
     st.caption(f"🔢 {len(filtered)} job pairs found")
     st.dataframe(filtered_display, width="stretch", hide_index=True)
 
-        # RIGHT SIDE → Drilldown
-        with col2:
+    # RIGHT SIDE → Drilldown
+    with col2:
         
             if job_counts:
         
