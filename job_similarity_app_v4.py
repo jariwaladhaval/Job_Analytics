@@ -53,7 +53,7 @@ jobs_master.columns = jobs_master.columns.str.strip()
 # Try to auto-detect columns
 job_col = [c for c in jobs_master.columns if "job" in c.lower() and c.lower() != "job id"][0]
 worksteam_col = [c for c in jobs_master.columns if "work" in c.lower()][0]
-domain_col = [c for c in jobs_master.columns if "domain" in c.lower()][0]
+domain_col = [c for c in jobs_master.columns if "Domain" in c.lower()][0]
 
 # ----------------------------------
 # CREATE MASTER LOOKUP TABLE
