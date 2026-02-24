@@ -150,8 +150,7 @@ if search_mode == "Search by Job ID":
     st.subheader(f"📌 Similar roles for Job ID: {selected_job}")
     st.caption(f"🔢 {len(filtered)} matching roles found")
 
-    filtered_display = filtered.copy()
-
+    
     filtered_display = filtered.copy()
     
     # Merge main job
@@ -261,11 +260,22 @@ elif search_mode == "Filter by Similarity Threshold":
         )
 
         st.sidebar.markdown("### Distribution of Job Match Counts")
+
         st.sidebar.dataframe(
             distribution,
-            width="stretch",   # updated from use_container_width
+            width="stretch",
             hide_index=True
         )
+        
+        # 🔹 ADD SELECTBOX HERE (Immediately After Table)
+        
+        selected_match_count = st.sidebar.selectbox(
+            "Select Match Count to View Job IDs",
+            distribution["Match Count"].tolist()
+        )
+        
+        st.session_state["selected_match_count"] = selected_match_count
+
 
     else:
         st.sidebar.info("No matching job pairs at selected threshold.")
@@ -275,9 +285,6 @@ elif search_mode == "Filter by Similarity Threshold":
     st.caption(f"🔢 {len(filtered)} job pairs found")
     filtered_display = filtered.copy()
 
-    filtered_display = filtered.copy()
-
-    filtered_display = filtered.copy()
 
     # Merge main job
     filtered_display = filtered_display.merge(
