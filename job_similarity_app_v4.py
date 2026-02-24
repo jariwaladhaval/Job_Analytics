@@ -25,6 +25,8 @@ def load_data():
     matrix = pd.read_excel("job_similarity_matrix.xlsx", index_col=0)
     jobs_master = pd.read_csv("jobs_dataset.csv", encoding="latin1")
     
+    
+    
     # Clean column names
     results.columns = results.columns.str.strip()
     matrix.columns = matrix.columns.str.strip()
@@ -41,6 +43,21 @@ def load_data():
     return results, matrix, jobs_master
 
 results_df, similarity_matrix, jobs_master = load_data()
+
+# ----------------------------------
+# CREATE MASTER LOOKUP TABLE
+# ----------------------------------
+
+job_lookup = (
+    jobs_master[
+        ["Job ID", "Job", "Work Stream", "Domain"]
+    ]
+    .drop_duplicates(subset=["Job ID"])
+    .rename(columns={
+        "Job": "Job Name"
+    })
+)
+
 
 
 # ----------------------------------
@@ -129,34 +146,40 @@ if search_mode == "Search by Job ID":
 
     # Merge for main Job ID
     filtered_display = filtered_display.merge(
-        jobs_master[["Job ID", "Job"]]
-            .rename(columns={"Job": "Job Name"}),
+        job_lookup,
         on="Job ID",
         how="left"
     )
     
     # Merge for Compared Job ID
     filtered_display = filtered_display.merge(
-        jobs_master[["Job ID", "Job"]]
-            .rename(columns={
-                "Job ID": "Compared Job ID",
-                "Job": "Compared Job Name"
-            }),
+        job_lookup.rename(columns={
+            "Job ID": "Compared Job ID",
+            "Job Name": "Compared Job Name",
+            "Work Stream": "Compared Work Stream",
+            "Domain": "Compared Domain"
+        }),
         on="Compared Job ID",
         how="left"
     )
+
     
     # Reorder columns (clean UI)
     priority_cols = [
     "Job ID",
     "Job Name",
+    "Work Stream",
+    "Domain",
     "Compared Job ID",
     "Compared Job Name",
+    "Compared Work Stream",
+    "Compared Domain",
     "Similarity %",
     "Text Similarity %",
     "Competency Similarity %",
     "Similarity Reason"
     ]
+
     
     existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
     remaining_cols = [c for c in filtered_display.columns if c not in existing_priority_cols]
@@ -244,22 +267,23 @@ elif search_mode == "Filter by Similarity Threshold":
 
     # Merge for main Job ID
     filtered_display = filtered_display.merge(
-        jobs_master[["Job ID", "Job"]]
-            .rename(columns={"Job": "Job Name"}),
+        job_lookup,
         on="Job ID",
         how="left"
     )
     
     # Merge for Compared Job ID
     filtered_display = filtered_display.merge(
-        jobs_master[["Job ID", "Job"]]
-            .rename(columns={
-                "Job ID": "Compared Job ID",
-                "Job": "Compared Job Name"
-            }),
+        job_lookup.rename(columns={
+            "Job ID": "Compared Job ID",
+            "Job Name": "Compared Job Name",
+            "Work Stream": "Compared Work Stream",
+            "Domain": "Compared Domain"
+        }),
         on="Compared Job ID",
         how="left"
     )
+
     
     priority_cols = [
     "Job ID",
@@ -301,11 +325,11 @@ elif search_mode == "NLP Search":
 
     if "Job ID" in results_display.columns:
         results_display = results_display.merge(
-            jobs_master[["Job ID", "Job"]]
-                .rename(columns={"Job": "Job Name"}),
-            on="Job ID",
-            how="left"
-        )
+        job_lookup,
+        on="Job ID",
+        how="left"
+    )
+
 
     st.dataframe(results_display, width="stretch", hide_index=True)
 
