@@ -323,6 +323,56 @@ elif search_mode == "Filter by Similarity Threshold":
 
     
     st.dataframe(filtered_display, width="stretch", hide_index=True)
+    
+    # ----------------------------------
+    # RIGHT SIDE DRILLDOWN VIEW
+    # ----------------------------------
+    
+    if "selected_match_count" in st.session_state:
+    
+        selected_count = st.session_state["selected_match_count"]
+    
+        # Get Job IDs having selected match count
+        job_ids_with_count = [
+            job_id for job_id, count in job_counts.items()
+            if count == selected_count
+        ]
+    
+        # Filter dataset for those Job IDs
+        drilldown_df = filtered_display[
+            filtered_display["Job ID"].isin(job_ids_with_count)
+        ]
+    
+        st.markdown("---")
+        st.subheader(f"📌 Drilldown: Job IDs with Match Count = {selected_count}")
+        st.caption(f"{len(job_ids_with_count)} Job IDs found")
+    
+        st.dataframe(drilldown_df, width="stretch", hide_index=True)
+    
+        # Download option
+        csv = drilldown_df.to_csv(index=False).encode("utf-8")
+    
+        st.download_button(
+            label="⬇️ Download Drilldown Data",
+            data=csv,
+            file_name=f"job_match_count_{selected_count}.csv",
+            mime="text/csv"
+        )
+    
+        # ----------------------------------
+        # INTERACTIVE MATCH COUNT SELECTION
+        # ----------------------------------
+        
+        if not distribution.empty:
+        
+            selected_match_count = st.sidebar.selectbox(
+                "Select Match Count to View Job IDs",
+                distribution["Match Count"].tolist()
+            )
+        
+            # Store selection in session
+            st.session_state["selected_match_count"] = selected_match_count
+
 
 
 
