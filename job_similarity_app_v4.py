@@ -223,17 +223,29 @@ elif search_mode == "Filter by Similarity Threshold":
         .reset_index(drop=True)
     )
 
-    # Compute job counts
-    job_counts = {}
-
+    # ----------------------------------
+    # Compute UNIQUE job match counts
+    # ----------------------------------
+    
+    # Build mapping of Job ID → set of matched Job IDs
+    job_match_map = {}
+    
     for _, row in filtered.iterrows():
         job_a = str(row["Job ID"])
         job_b = str(row["Compared Job ID"])
-
-        job_counts[job_a] = job_counts.get(job_a, 0) + 1
-        job_counts[job_b] = job_counts.get(job_b, 0) + 1
-
+    
+        if job_a != job_b:  # safety check
+            job_match_map.setdefault(job_a, set()).add(job_b)
+            job_match_map.setdefault(job_b, set()).add(job_a)
+    
+    # Convert to counts
+    job_counts = {
+        job_id: len(matches)
+        for job_id, matches in job_match_map.items()
+    }
+    
     unique_jobs = len(job_counts)
+
 
     # ✅ Sidebar Summary (MUST stay inside this block)
     st.sidebar.markdown("---")
