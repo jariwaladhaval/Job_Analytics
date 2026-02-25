@@ -364,38 +364,51 @@ elif search_mode == "Filter by Similarity Threshold":
     with col2:
     
         if job_counts:
-    
+
             st.subheader("📌 Drilldown View")
-    
+        
             # Get Job IDs having selected match count
             job_ids_with_count = sorted([
                 job_id for job_id, count in job_counts.items()
                 if count == selected_match_count
             ])
-            
-            # Drill only from cleaned dataset
-            drilldown_df = filtered_clean[
-                filtered_clean["Job ID"].isin(job_ids_with_count)
-            ].copy()
-            
-            # Sort by Job ID ascending
+        
+            # Build full drilldown list (undirected logic)
+            drill_rows = []
+        
+            for job_id in job_ids_with_count:
+        
+                temp = filtered_clean[
+                    (filtered_clean["Job ID"] == job_id) |
+                    (filtered_clean["Compared Job ID"] == job_id)
+                ].copy()
+        
+                temp["Primary Job ID"] = job_id
+                drill_rows.append(temp)
+        
+            if drill_rows:
+                drilldown_df = pd.concat(drill_rows, ignore_index=True)
+            else:
+                drilldown_df = pd.DataFrame()
+        
+            # Sort ascending
             drilldown_df = drilldown_df.sort_values(
-                by=["Job ID", "Compared Job ID"]
+                by=["Primary Job ID", "Job ID", "Compared Job ID"]
             ).reset_index(drop=True)
-
-                
+        
             st.caption(f"{len(job_ids_with_count)} Job IDs found")
-    
+        
             st.dataframe(drilldown_df, width="stretch", hide_index=True)
-    
+        
             csv = drilldown_df.to_csv(index=False).encode("utf-8")
-    
+        
             st.download_button(
                 label="⬇️ Download Drilldown",
                 data=csv,
                 file_name=f"job_match_count_{selected_match_count}.csv",
                 mime="text/csv"
             )
+
 
     
         
