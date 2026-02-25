@@ -67,6 +67,32 @@ job_lookup = (
     })
 )
 
+def format_similarity_display(df):
+    """
+    Standardizes column order and formatting for similarity views
+    """
+
+    # Desired order
+    priority_cols = [
+        "Domain",
+        "Work Stream",
+        "Job ID",
+        "Job Name",
+        "Compared Domain",
+        "Compared Work Stream",
+        "Compared Job ID",
+        "Compared Job Name",
+    ]
+
+    # Keep only columns that exist
+    existing_priority = [c for c in priority_cols if c in df.columns]
+    remaining_cols = [c for c in df.columns if c not in existing_priority]
+
+    df = df[existing_priority + remaining_cols]
+
+    return df
+
+
 # For sidebar formatting
 job_id_to_name = (
     job_lookup
@@ -187,10 +213,7 @@ if search_mode == "Search by Job ID":
 
 
     
-    existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
-    remaining_cols = [c for c in filtered_display.columns if c not in existing_priority_cols]
-    
-    filtered_display = filtered_display[existing_priority_cols + remaining_cols]
+    filtered_display = format_similarity_display(filtered_display)
 
     
     st.dataframe(filtered_display, width="stretch", hide_index=True)
@@ -341,10 +364,7 @@ elif search_mode == "Filter by Similarity Threshold":
     ]
 
     
-    existing_priority_cols = [c for c in priority_cols if c in filtered_display.columns]
-    remaining_cols = [c for c in filtered_display.columns if c not in existing_priority_cols]
-    
-    filtered_display = filtered_display[existing_priority_cols + remaining_cols]
+    filtered_display = format_similarity_display(filtered_display)
 
     
     
@@ -360,6 +380,16 @@ elif search_mode == "Filter by Similarity Threshold":
         st.caption(f"🔢 {len(filtered)} job pairs found")
         st.dataframe(filtered_display, width="stretch", hide_index=True)
     
+    st.markdown(
+    """
+    <div style='display:flex; font-weight:bold; font-size:16px'>
+        <div style='width:50%'>SOURCE</div>
+        <div style='width:50%'>COMPARED</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
+
     # RIGHT SIDE → Drilldown
     with col2:
 
@@ -449,6 +479,13 @@ elif search_mode == "NLP Search":
 
             results_display = results.copy()
 
+            # Sort descending by similarity
+            if "Similarity %" in results_display.columns:
+                results_display = results_display.sort_values(
+                    by="Similarity %",
+                    ascending=False
+                ).reset_index(drop=True)
+
             # Merge job metadata
             if "Job ID" in results_display.columns:
                 results_display = results_display.merge(
@@ -457,7 +494,20 @@ elif search_mode == "NLP Search":
                     how="left"
                 )
 
-            st.dataframe(results_display, width="stretch", hide_index=True)
+            # Reorder columns
+            results_display = format_similarity_display(results_display)
+
+            # Show total count
+            st.caption(f"🔢 Total Matched Roles: {len(results_display)}")
+
+            # Display
+            st.markdown("### 🔹 SOURCE ROLE → MATCHED ROLES")
+
+            st.dataframe(
+                results_display,
+                width="stretch",
+                hide_index=True
+            )
 
         else:
             st.info("No matching roles found.")
