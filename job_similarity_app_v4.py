@@ -240,15 +240,7 @@ elif search_mode == "Filter by Similarity Threshold":
         .sort_values("Similarity %", ascending=False)
         .reset_index(drop=True)
     )
-    '''
-    # Remove symmetric duplicates
-    filtered["pair_key"] = filtered.apply(
-        lambda x: tuple(sorted([x["Job ID"], x["Compared Job ID"]])),
-        axis=1
-    )
-    
-    filtered = filtered.drop_duplicates(subset=["pair_key"]).drop(columns=["pair_key"])
-    '''
+
     # VERY IMPORTANT: build display dataset from THIS cleaned filtered
     filtered_clean = filtered.copy()
 
