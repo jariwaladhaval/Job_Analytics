@@ -442,22 +442,28 @@ elif search_mode == "NLP Search":
     )
 
     if query:
+
         results = search_by_natural_language(query)
-        results_display = results.copy()
 
-    if "Job ID" in results_display.columns:
-        results_display = results_display.merge(
-        job_lookup,
-        on="Job ID",
-        how="left"
-    )
+        if results is not None and not results.empty:
 
+            results_display = results.copy()
 
-    st.dataframe(results_display, width="stretch", hide_index=True)
+            # Merge job metadata
+            if "Job ID" in results_display.columns:
+                results_display = results_display.merge(
+                    job_lookup,
+                    on="Job ID",
+                    how="left"
+                )
 
+            st.dataframe(results_display, width="stretch", hide_index=True)
 
+        else:
+            st.info("No matching roles found.")
 
-
+    else:
+        st.info("Enter a search description to see results.")
     
 
 
