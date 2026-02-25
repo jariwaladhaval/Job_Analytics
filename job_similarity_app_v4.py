@@ -368,7 +368,7 @@ elif search_mode == "Filter by Similarity Threshold":
 
     
     
-    # ----------------------------------
+# ----------------------------------
 # MAIN VIEW — FULL WIDTH
 # ----------------------------------
 
@@ -440,12 +440,6 @@ if job_counts:
 
     csv = drilldown_df.to_csv(index=False).encode("utf-8")
 
-
-
-
-        
-
-
 # ----------------------------------
 # MODE 3 — NLP Search
 # ----------------------------------
@@ -474,6 +468,9 @@ elif search_mode == "NLP Search":
                     ascending=False
                 ).reset_index(drop=True)
 
+            # Show total count
+            st.caption(f"🔢 {len(results_display)} matching roles found")
+
             # Merge job metadata
             if "Job ID" in results_display.columns:
                 results_display = results_display.merge(
@@ -482,26 +479,28 @@ elif search_mode == "NLP Search":
                     how="left"
                 )
 
-            # Reorder columns
-            results_display = format_similarity_display(results_display)
+            # Reorder columns (Source format style)
+            ordered_cols = [
+                "Domain",
+                "Work Stream",
+                "Job ID",
+                "Job Name"
+            ]
 
-            # Show total count
-            st.caption(f"🔢 Total Matched Roles: {len(results_display)}")
+            remaining_cols = [
+                c for c in results_display.columns
+                if c not in ordered_cols
+            ]
 
-            # Display
-            st.markdown("### 🔹 SOURCE ROLE → MATCHED ROLES")
+            results_display = results_display[ordered_cols + remaining_cols]
 
-            st.dataframe(
-                results_display,
-                width="stretch",
-                hide_index=True
-            )
+            st.dataframe(results_display, width="stretch", hide_index=True)
 
         else:
             st.info("No matching roles found.")
 
     else:
-        st.info("Enter a search description to see results.")
+        st.info("Enter a description above to search similar roles.")
     
 
 
