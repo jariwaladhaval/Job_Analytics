@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb 10 14:53:46 2026
 
-@author: Dhaval.Jariwala
-"""
 
 import streamlit as st
 import pandas as pd
@@ -369,17 +364,22 @@ elif search_mode == "Filter by Similarity Threshold":
             st.subheader("📌 Drilldown View")
     
             # Get Job IDs having selected match count
-            # Get Job IDs having selected match count
             job_ids_with_count = [
                 job_id for job_id, count in job_counts.items()
                 if count == selected_match_count
             ]
             
-            # Include matches where job appears in either column
-            drilldown_df = filtered_display[
-                (filtered_display["Job ID"].isin(job_ids_with_count)) |
-                (filtered_display["Compared Job ID"].isin(job_ids_with_count))
-            ]
+            # Build drilldown by stacking each job’s matches separately
+            drilldown_list = []
+            
+            for job_id in job_ids_with_count:
+                job_rows = filtered_display[
+                    (filtered_display["Job ID"] == job_id) |
+                    (filtered_display["Compared Job ID"] == job_id)
+                ]
+                drilldown_list.append(job_rows)
+            
+            drilldown_df = pd.concat(drilldown_list).drop_duplicates().reset_index(drop=True)
 
     
             st.caption(f"{len(job_ids_with_count)} Job IDs found")
