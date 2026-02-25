@@ -361,14 +361,18 @@ elif search_mode == "Filter by Similarity Threshold":
             st.subheader("📌 Drilldown View")
     
             # Get Job IDs having selected match count
+            # Get Job IDs having selected match count
             job_ids_with_count = [
                 job_id for job_id, count in job_counts.items()
                 if count == selected_match_count
             ]
-    
+            
+            # Include matches where job appears in either column
             drilldown_df = filtered_display[
-                filtered_display["Job ID"].isin(job_ids_with_count)
+                (filtered_display["Job ID"].isin(job_ids_with_count)) |
+                (filtered_display["Compared Job ID"].isin(job_ids_with_count))
             ]
+
     
             st.caption(f"{len(job_ids_with_count)} Job IDs found")
     
