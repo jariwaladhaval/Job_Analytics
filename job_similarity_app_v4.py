@@ -225,6 +225,9 @@ elif search_mode == "Filter by Similarity Threshold":
     )
     
     filtered = filtered.drop_duplicates(subset=["pair_key"]).drop(columns=["pair_key"])
+    
+    # VERY IMPORTANT: build display dataset from THIS cleaned filtered
+    filtered_clean = filtered.copy()
 
     # ----------------------------------
     # Compute UNIQUE job match counts
@@ -297,7 +300,8 @@ elif search_mode == "Filter by Similarity Threshold":
     # Main page table
     st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
     st.caption(f"🔢 {len(filtered)} job pairs found")
-    filtered_display = filtered.copy()
+    filtered_display = filtered_clean.copy()
+
 
 
     # Merge main job
@@ -364,16 +368,21 @@ elif search_mode == "Filter by Similarity Threshold":
             st.subheader("📌 Drilldown View")
     
             # Get Job IDs having selected match count
-            job_ids_with_count = [
+            job_ids_with_count = sorted([
                 job_id for job_id, count in job_counts.items()
                 if count == selected_match_count
-            ]
+            ])
             
-            # Only count matches where job is primary (Job ID column)
-            drilldown_df = filtered_display[
-                filtered_display["Job ID"].isin(job_ids_with_count)
-            ].reset_index(drop=True)
+            # Drill only from cleaned dataset
+            drilldown_df = filtered_clean[
+                filtered_clean["Job ID"].isin(job_ids_with_count)
+            ].copy()
             
+            # Sort by Job ID ascending
+            drilldown_df = drilldown_df.sort_values(
+                by=["Job ID", "Compared Job ID"]
+            ).reset_index(drop=True)
+
                 
             st.caption(f"{len(job_ids_with_count)} Job IDs found")
     
