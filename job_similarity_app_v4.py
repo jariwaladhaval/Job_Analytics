@@ -372,9 +372,6 @@ elif search_mode == "Filter by Similarity Threshold":
 # MAIN VIEW — FULL WIDTH
 # ----------------------------------
 
-st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
-st.caption(f"🔢 {len(filtered)} job pairs found")
-
 st.dataframe(
     filtered_display,
     width="stretch",
@@ -434,8 +431,7 @@ if job_counts:
 
     st.caption(f"🔢 {len(job_ids_with_count)} Job IDs found")
 
-    st.markdown("### 🔹 SOURCE ROLE → COMPARED ROLE")
-
+    
     st.dataframe(
         drilldown_df,
         width="stretch",
@@ -444,12 +440,7 @@ if job_counts:
 
     csv = drilldown_df.to_csv(index=False).encode("utf-8")
 
-    st.download_button(
-        label="⬇️ Download Drilldown",
-        data=csv,
-        file_name=f"job_match_count_{selected_match_count}.csv",
-        mime="text/csv"
-    )
+
 
 
         
