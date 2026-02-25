@@ -369,19 +369,12 @@ elif search_mode == "Filter by Similarity Threshold":
                 if count == selected_match_count
             ]
             
-            # Build drilldown by stacking each job’s matches separately
-            drilldown_list = []
+            # Only count matches where job is primary (Job ID column)
+            drilldown_df = filtered_display[
+                filtered_display["Job ID"].isin(job_ids_with_count)
+            ].reset_index(drop=True)
             
-            for job_id in job_ids_with_count:
-                job_rows = filtered_display[
-                    (filtered_display["Job ID"] == job_id) |
-                    (filtered_display["Compared Job ID"] == job_id)
-                ]
-                drilldown_list.append(job_rows)
-            
-            drilldown_df = pd.concat(drilldown_list).drop_duplicates().reset_index(drop=True)
-
-    
+                
             st.caption(f"{len(job_ids_with_count)} Job IDs found")
     
             st.dataframe(drilldown_df, width="stretch", hide_index=True)
