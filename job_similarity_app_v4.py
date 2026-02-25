@@ -365,6 +365,13 @@ elif search_mode == "Filter by Similarity Threshold":
 
     
     filtered_display = format_similarity_display(filtered_display)
+    
+    st.dataframe(
+    filtered_display,
+    width="stretch",
+    hide_index=True
+    )
+
     # ----------------------------------
     # DRILLDOWN SECTION (FULL WIDTH BELOW)
     # ----------------------------------
