@@ -369,91 +369,88 @@ elif search_mode == "Filter by Similarity Threshold":
     
     
     # ----------------------------------
-    # MAIN LAYOUT: 2 COLUMNS
-    # ----------------------------------
-    
-    col1, col2 = st.columns([2, 1])  # Left wider than right
-    
-    # LEFT SIDE → Full Matching Pairs
-    with col1:
-        st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
-        st.caption(f"🔢 {len(filtered)} job pairs found")
-        st.dataframe(filtered_display, width="stretch", hide_index=True)
-    
-    st.markdown(
-    """
-    <div style='display:flex; font-weight:bold; font-size:16px'>
-        <div style='width:50%'>SOURCE</div>
-        <div style='width:50%'>COMPARED</div>
-    </div>
-    """,
-    unsafe_allow_html=True
+# MAIN VIEW — FULL WIDTH
+# ----------------------------------
+
+st.subheader(f"📈 Job pairs with similarity ≥ {threshold}%")
+st.caption(f"🔢 {len(filtered)} job pairs found")
+
+st.dataframe(
+    filtered_display,
+    width="stretch",
+    hide_index=True
+)
+
+# ----------------------------------
+# DRILLDOWN SECTION (FULL WIDTH BELOW)
+# ----------------------------------
+
+if job_counts:
+
+    st.markdown("---")
+    st.subheader("📌 Drilldown View")
+
+    # Step 1: Get Job IDs with selected match count
+    job_ids_with_count = sorted([
+        job_id for job_id, count in job_counts.items()
+        if count == selected_match_count
+    ])
+
+    drill_rows = []
+
+    for job_id in job_ids_with_count:
+
+        # Rows where job_id is primary
+        direct_rows = filtered_clean[
+            filtered_clean["Job ID"] == job_id
+        ].copy()
+
+        # Rows where job_id is secondary → flip
+        reverse_rows = filtered_clean[
+            filtered_clean["Compared Job ID"] == job_id
+        ].copy()
+
+        if not reverse_rows.empty:
+            reverse_rows = reverse_rows.rename(columns={
+                "Job ID": "Compared Job ID",
+                "Compared Job ID": "Job ID"
+            })
+
+        combined = pd.concat([direct_rows, reverse_rows], ignore_index=True)
+        drill_rows.append(combined)
+
+    if drill_rows:
+        drilldown_df = pd.concat(drill_rows, ignore_index=True)
+    else:
+        drilldown_df = pd.DataFrame()
+
+    drilldown_df = drilldown_df[
+        drilldown_df["Job ID"].isin(job_ids_with_count)
+    ]
+
+    drilldown_df = drilldown_df.sort_values(
+        by=["Job ID", "Compared Job ID"]
+    ).reset_index(drop=True)
+
+    st.caption(f"🔢 {len(job_ids_with_count)} Job IDs found")
+
+    st.markdown("### 🔹 SOURCE ROLE → COMPARED ROLE")
+
+    st.dataframe(
+        drilldown_df,
+        width="stretch",
+        hide_index=True
     )
 
-    # RIGHT SIDE → Drilldown
-    with col2:
+    csv = drilldown_df.to_csv(index=False).encode("utf-8")
 
-            if job_counts:
-        
-                st.subheader("📌 Drilldown View")
-        
-                # Step 1: Get Job IDs with selected match count
-                job_ids_with_count = sorted([
-                    job_id for job_id, count in job_counts.items()
-                    if count == selected_match_count
-                ])
-        
-                drill_rows = []
-        
-                for job_id in job_ids_with_count:
-        
-                    # Rows where job_id is primary
-                    direct_rows = filtered_clean[
-                        filtered_clean["Job ID"] == job_id
-                    ].copy()
-        
-                    # Rows where job_id is secondary → flip them
-                    reverse_rows = filtered_clean[
-                        filtered_clean["Compared Job ID"] == job_id
-                    ].copy()
-        
-                    if not reverse_rows.empty:
-                        reverse_rows = reverse_rows.rename(columns={
-                            "Job ID": "Compared Job ID",
-                            "Compared Job ID": "Job ID"
-                        })
-        
-                    combined = pd.concat([direct_rows, reverse_rows], ignore_index=True)
-        
-                    drill_rows.append(combined)
-        
-                if drill_rows:
-                    drilldown_df = pd.concat(drill_rows, ignore_index=True)
-                else:
-                    drilldown_df = pd.DataFrame()
-        
-                # Keep only relevant jobs
-                drilldown_df = drilldown_df[
-                    drilldown_df["Job ID"].isin(job_ids_with_count)
-                ]
-        
-                # Sort properly
-                drilldown_df = drilldown_df.sort_values(
-                    by=["Job ID", "Compared Job ID"]
-                ).reset_index(drop=True)
-        
-                st.caption(f"{len(job_ids_with_count)} Job IDs found")
-        
-                st.dataframe(drilldown_df, width="stretch", hide_index=True)
-        
-                csv = drilldown_df.to_csv(index=False).encode("utf-8")
-        
-                st.download_button(
-                    label="⬇️ Download Drilldown",
-                    data=csv,
-                    file_name=f"job_match_count_{selected_match_count}.csv",
-                    mime="text/csv"
-                )
+    st.download_button(
+        label="⬇️ Download Drilldown",
+        data=csv,
+        file_name=f"job_match_count_{selected_match_count}.csv",
+        mime="text/csv"
+    )
+
 
         
 
