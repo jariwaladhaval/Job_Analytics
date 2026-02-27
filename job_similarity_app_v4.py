@@ -7,7 +7,7 @@ from job_similarity_engine import search_by_natural_language
 # PAGE CONFIG
 # ----------------------------------
 st.set_page_config(
-    page_title="RoleGraph AI – Job Similarity Engine",
+    page_title="RoleGraph AI – Job Similarity Engine (70-30)",
     layout="wide"
 )
 
